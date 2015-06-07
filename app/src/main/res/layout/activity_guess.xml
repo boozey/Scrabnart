@@ -1,0 +1,153 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.nakedape.scrabnart.GuessActivity"
+    android:orientation="vertical"
+    android:background="@color/white">
+
+    <com.nakedape.scrabnart.DrawingPlayer
+        android:id="@+id/drawing_player"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_marginBottom="3dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="3dp"
+        android:layout_weight="1"
+        android:background="#FFFFFFFF"
+        android:onClick="PlayDrawing" />
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:background="@color/white">
+
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/tile1"
+            android:background="@drawable/ic_a_tile"
+            android:onClick="ClickTile"/>
+
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/tile2"
+            android:background="@drawable/ic_b_tile"
+            android:onClick="ClickTile" />
+
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/tile3"
+            android:background="@drawable/ic_a_tile"
+            android:onClick="ClickTile" />
+
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/tile4"
+            android:background="@drawable/ic_a_tile"
+            android:onClick="ClickTile" />
+
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/tile5"
+            android:background="@drawable/ic_a_tile"
+            android:onClick="ClickTile" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp">
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/tile6"
+            android:background="@drawable/ic_a_tile"
+            android:onClick="ClickTile" />
+
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/tile7"
+            android:background="@drawable/ic_a_tile"
+            android:onClick="ClickTile" />
+
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/tile8"
+            android:background="@drawable/ic_a_tile"
+            android:onClick="ClickTile" />
+
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/tile9"
+            android:background="@drawable/ic_a_tile"
+            android:onClick="ClickTile"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:visibility="visible">
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/letter1"
+            android:onClick="ClickLetter"
+            android:background="@drawable/empty_tile" />
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/letter2"
+            android:onClick="ClickLetter"
+            android:background="@drawable/empty_tile"  />
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/letter3"
+            android:onClick="ClickLetter"
+            android:background="@drawable/empty_tile"  />
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/letter4"
+            android:onClick="ClickLetter"
+            android:background="@drawable/empty_tile"  />
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/letter5"
+            android:onClick="ClickLetter"
+            android:background="@drawable/empty_tile"  />
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/letter6"
+            android:onClick="ClickLetter"
+            android:background="@drawable/empty_tile"  />
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/letter7"
+            android:onClick="ClickLetter"
+            android:background="@drawable/empty_tile"  />
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/letter8"
+            android:onClick="ClickLetter"
+            android:background="@drawable/empty_tile"  />
+    </LinearLayout>
+
+</LinearLayout>

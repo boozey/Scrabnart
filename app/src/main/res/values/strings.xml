@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Scrabnart</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_draw_scrabble">DrawScrabbleActivity</string>
+    <string name="title_activity_guess">GuessActivity</string>
+    <string name="app_id">863544170535</string>
+</resources>

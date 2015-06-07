@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/tiles_popup"
+    android:gravity="bottom"
+    android:background="#FFFFFF">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal">
+
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/tile1"
+            android:background="@drawable/ic_a_tile"/>
+
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/tile2"
+            android:background="@drawable/ic_b_tile" />
+
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/tile3"
+            android:background="@drawable/ic_a_tile" />
+
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/tile4"
+            android:background="@drawable/ic_a_tile" />
+
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/tile5"
+            android:background="@drawable/ic_a_tile" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp">>
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/tile6"
+            android:background="@drawable/ic_a_tile" />
+
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/tile7"
+            android:background="@drawable/ic_a_tile" />
+
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/tile8"
+            android:background="@drawable/ic_a_tile" />
+
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/tile9"
+            android:background="@drawable/ic_a_tile"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:visibility="visible">
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/letter1"
+            android:onClick="OpenTilePopup"
+            android:background="@drawable/empty_tile" />
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/letter2"
+            android:background="@drawable/empty_tile"  />
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/letter3"
+            android:background="@drawable/empty_tile"  />
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/letter4"
+            android:background="@drawable/empty_tile"  />
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/letter5"
+            android:background="@drawable/empty_tile"  />
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/letter6"
+            android:background="@drawable/empty_tile"  />
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/letter7"
+            android:background="@drawable/empty_tile"  />
+        <ImageButton
+            android:layout_width="@dimen/letter_tile_size"
+            android:layout_height="@dimen/letter_tile_size"
+            android:id="@+id/letter8"
+            android:background="@drawable/empty_tile"  />
+        </LinearLayout>
+</LinearLayout>
