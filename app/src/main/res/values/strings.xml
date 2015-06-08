@@ -6,4 +6,14 @@
     <string name="title_activity_draw_scrabble">DrawScrabbleActivity</string>
     <string name="title_activity_guess">GuessActivity</string>
     <string name="app_id">863544170535</string>
+
+    <!-- Invitation/Turn list item strings -->
+    <string name="take_my_turn">Take my turn</string>
+    <string name="accept_invitation">Accept invitation</string>
+    <string name="decline_invitation">Decline invitation</string>
+    <string name="leave_match">Leave match</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="match_invitation">\shas invited you to a new game.</string>
+    <string name="my_turn_msg">\sis waiting for you to take a turn.</string>
+    <string name="their_turn_msg">Waiting for\s</string>
 </resources>

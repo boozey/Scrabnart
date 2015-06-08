@@ -38,6 +38,7 @@ public class GuessActivity extends ActionBarActivity {
     private static final int EMPTY = -1;
     private DrawingPlayer drawingPlayer;
     private int match_id;
+    private ScrabnartGame scrabnartGame;
     private int[] word;
     private int[] tiles;
     private int[] letters = {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY};
@@ -52,9 +53,10 @@ public class GuessActivity extends ActionBarActivity {
         drawingPlayer = (DrawingPlayer)findViewById(com.nakedape.scrabnart.R.id.drawing_player);
         Intent data = getIntent();
         match_id = data.getIntExtra(MainActivity.MATCH_ID, 0);
-        word = data.getIntArrayExtra(MainActivity.WORD);
-        tiles = data.getIntArrayExtra(MainActivity.TILES);
-        drawing = data.getParcelableArrayListExtra(MainActivity.DRAWING);
+        scrabnartGame = new ScrabnartGame(data.getByteArrayExtra(MainActivity.GAME_DATA));
+        word = scrabnartGame.getCurrentWord();
+        tiles = scrabnartGame.getScrambledWordTiles();
+        drawing = scrabnartGame.getCurrentDrawing();
         drawingPlayer.SetData(drawing);
         FillGuessTiles();
     }
@@ -130,6 +132,7 @@ public class GuessActivity extends ActionBarActivity {
                     points += ScrabnartGame.point_values[l];
                 }
             }
+            scrabnartGame.TakeGuessTurn(points);
             displayWinnerPopup();
         }
     }
@@ -162,7 +165,7 @@ public class GuessActivity extends ActionBarActivity {
         if (winPopup.isShowing()) winPopup.dismiss();
         Intent data = new Intent();
         data.putExtra(MainActivity.MATCH_ID, match_id);
-        data.putExtra(MainActivity.POINTS, points);
+        data.putExtra(MainActivity.GAME_DATA, scrabnartGame.getGameData());
         setResult(MainActivity.GUESS_RESULT, data);
         finish();
 

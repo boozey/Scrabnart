@@ -19,8 +19,10 @@ import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,6 +64,8 @@ public class MainActivity extends ActionBarActivity implements
     private GoogleApiClient mGoogleApiClient;
     private Context context = this;
     private ScrabnartGame scrabnartGame;
+    private ArrayList<String> leaveMatchList;
+    private ArrayList<String> declineInvitationList;
 
     // Activity method overrides
     @Override
@@ -86,6 +90,8 @@ public class MainActivity extends ActionBarActivity implements
                 }
             }
         });
+        leaveMatchList = new ArrayList<>();
+        declineInvitationList = new ArrayList<>();
         // Create the Google Api Client with access to the Play Games services
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -169,33 +175,35 @@ public class MainActivity extends ActionBarActivity implements
     private boolean mAutoStartSignInFlow = true;
     private boolean mSignInClicked = false;
     private LoadMatchesResponse myMatchesResponse;
-    private LoadMatchesResponse theirMatchesResponse;
+    private LoadMatchesResponseAdapter myTurnItemAdapter;
     private ResultCallback<TurnBasedMultiplayer.LoadMatchesResult> myTurnMatchesResultCallback = new ResultCallback<TurnBasedMultiplayer.LoadMatchesResult>() {
         @Override
         public void onResult(TurnBasedMultiplayer.LoadMatchesResult loadMatchesResult) {
             myMatchesResponse = loadMatchesResult.getMatches();
-            LoadMatchesResponseAdapter listAdapter = new LoadMatchesResponseAdapter(context, R.layout.invitiation_row);
-            listAdapter.addAll(myMatchesResponse);
+            myTurnItemAdapter = new LoadMatchesResponseAdapter(context, R.layout.invitiation_row);
+            myTurnItemAdapter.addAll(myMatchesResponse);
             ListView inviteListView = (ListView) findViewById(R.id.invitation_listview);
             View spinner = findViewById(R.id.progress1);
             spinner.setVisibility(View.GONE);
             inviteListView.setVisibility(View.VISIBLE);
-            inviteListView.setAdapter(listAdapter);
+            inviteListView.setAdapter(myTurnItemAdapter);
             Log.d("My Turn Matches", String.valueOf(myMatchesResponse.getMyTurnMatches().getCount()));
             Log.d("Invitations", String.valueOf(myMatchesResponse.getInvitations().getCount()));
         }
     };
+    private LoadMatchesResponse theirMatchesResponse;
+    private LoadMatchesResponseAdapter theirTurnItemAdapter;
     private ResultCallback<TurnBasedMultiplayer.LoadMatchesResult> theirTurnMatchesResultCallback = new ResultCallback<TurnBasedMultiplayer.LoadMatchesResult>() {
         @Override
         public void onResult(TurnBasedMultiplayer.LoadMatchesResult loadMatchesResult) {
             theirMatchesResponse = loadMatchesResult.getMatches();
-            LoadMatchesResponseAdapter listAdapter = new LoadMatchesResponseAdapter(context, R.layout.invitiation_row);
+            theirTurnItemAdapter = new LoadMatchesResponseAdapter(context, R.layout.invitiation_row);
             View spinner = findViewById(R.id.progress2);
             spinner.setVisibility(View.GONE);
             ListView theirTurnListView = (ListView)findViewById(R.id.their_turn_listview);
             theirTurnListView.setVisibility(View.VISIBLE);
-            listAdapter.addAll(theirMatchesResponse);
-            theirTurnListView.setAdapter(listAdapter);
+            theirTurnItemAdapter.addAll(theirMatchesResponse);
+            theirTurnListView.setAdapter(theirTurnItemAdapter);
         }
     };
     @Override
@@ -212,6 +220,14 @@ public class MainActivity extends ActionBarActivity implements
             Games.TurnBasedMultiplayer.takeTurn(mGoogleApiClient, scrabnartGame.getMatch_id(), scrabnartGame.getGameData(), scrabnartGame.getNextPlayer());
             scrabnartGame.isSaved = true;
         }
+        for (String s : leaveMatchList){
+            Games.TurnBasedMultiplayer.leaveMatch(mGoogleApiClient, s);
+        }
+        leaveMatchList.clear();
+        for (String s : declineInvitationList){
+            Games.TurnBasedMultiplayer.declineInvitation(mGoogleApiClient, s);
+        }
+        declineInvitationList.clear();
         Games.TurnBasedMultiplayer
                 .loadMatchesByStatus(mGoogleApiClient, new int[]{TurnBasedMatch.MATCH_TURN_STATUS_INVITED, TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN})
                 .setResultCallback(myTurnMatchesResultCallback);
@@ -356,7 +372,7 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
-    // Game play methods
+    // Game play methods and variables
     public void NewGame(View v){
         Intent intent =
                 Games.TurnBasedMultiplayer.getSelectOpponentsIntent(mGoogleApiClient, 1, 1, false);
@@ -392,19 +408,82 @@ public class MainActivity extends ActionBarActivity implements
         Intent myIntent = new Intent();
         myIntent.setClassName("com.nakedape.scrabnart", "com.nakedape.scrabnart.GuessActivity");
         myIntent.putExtra(MATCH_ID, match.getMatchId());
-        myIntent.putExtra(WORD, scrabnartGame.getCurrentWord());
-        myIntent.putExtra(DRAWING, scrabnartGame.getCurrentDrawing());
-        myIntent.putExtra(TILES, scrabnartGame.getScrambledWordTiles());
+        myIntent.putExtra(GAME_DATA, match.getData());
         startActivityForResult(myIntent, GUESS_RESULT);
     }
     private void FinishGuessTurn(Intent data){
         String match_id = data.getStringExtra(MATCH_ID);
-        int points = data.getIntExtra(POINTS, 0);
-        scrabnartGame.TakeGuessTurn(points);
+        scrabnartGame = new ScrabnartGame(data.getByteArrayExtra(GAME_DATA));
         UploadGame(match_id, null);
         StartDrawTurn(match_id);
     }
+    private void LeaveMatch(String match_id){
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()){
+            Games.TurnBasedMultiplayer.leaveMatch(mGoogleApiClient, match_id);
+        }
+        else {
+            leaveMatchList.add(match_id);
+        }
+    }
+    private void DeclineInvitation(String match_id){
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()){
+            Games.TurnBasedMultiplayer.declineInvitation(mGoogleApiClient, match_id);
+        }
+        else {
+            declineInvitationList.add(match_id);
+        }
+    }
 
+
+    private int myTurnItemPosition = 0;
+    private PopupMenu.OnMenuItemClickListener myTurnItemMenuListener = new PopupMenu.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            Log.d(LOG_TAG, "onMenuItemClick " + String.valueOf(myTurnItemPosition));
+            TurnBasedMatch match = null;
+            Invitation invitation = null;
+            if (myTurnItemAdapter.getItem(myTurnItemPosition).getType() == MatchListElement.MY_TURN_MATCH) {
+                match = myTurnItemAdapter.getItem(myTurnItemPosition).getMatch();
+            }
+            else {
+                invitation = myTurnItemAdapter.getItem(myTurnItemPosition).getInvitation();
+            }
+            switch (item.getItemId()){
+                case R.id.action_accept_invitation:
+                    return true;
+                case R.id.action_decline_invitation:
+                    myTurnItemAdapter.removeItem(myTurnItemPosition);
+                    DeclineInvitation(invitation.getInvitationId());
+                    return true;
+                case R.id.action_take_my_turn:
+                    myTurnItemAdapter.removeItem(myTurnItemPosition);
+                    StartGuessTurn(match);
+                    return true;
+                case R.id.action_leave_match:
+                    myTurnItemAdapter.removeItem(myTurnItemPosition);
+                    LeaveMatch(match.getMatchId());
+                    return true;
+                default:
+                    return false;
+            }
+        }
+    };
+    private int theirTurnItemPosition = 0;
+    private PopupMenu.OnMenuItemClickListener theirTurnItemMenuListener = new PopupMenu.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            Log.d(LOG_TAG, "onMenuItemClick " + String.valueOf(myTurnItemPosition));
+            TurnBasedMatch match = theirTurnItemAdapter.getItem(theirTurnItemPosition).getMatch();
+            switch (item.getItemId()){
+                case R.id.action_leave_match:
+                    theirTurnItemAdapter.removeItem(myTurnItemPosition);
+                    LeaveMatch(match.getMatchId());
+                    return true;
+                default:
+                    return false;
+            }
+        }
+    };
     private class LoadMatchesResponseAdapter extends BaseAdapter {
 
 
@@ -448,6 +527,10 @@ public class MainActivity extends ActionBarActivity implements
         public long getItemId(int position) {
             return position;
         }
+        public void removeItem(int position) {
+            mData.remove(position);
+            notifyDataSetChanged();
+        }
 
         @Override
         public View getView(int position, View convertView, final ViewGroup parent) {
@@ -472,7 +555,7 @@ public class MainActivity extends ActionBarActivity implements
             set.start();
             return convertView;
         }
-        private View getInvitationView(int position){
+        private View getInvitationView(final int position){
             mInflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View convertView = mInflater.inflate(R.layout.invitiation_row, null);
             ImageView picture = (ImageView)convertView.findViewById(R.id.imageView1);
@@ -482,23 +565,11 @@ public class MainActivity extends ActionBarActivity implements
             final MatchListElement data = mData.get(position);
             Invitation invitation = data.getInvitation();
             ImageManager.create(context).loadImage(picture, invitation.getInviter().getIconImageUri());
-            textView.setText(data.getInvitation().getInviter().getDisplayName() + " invited you to a new game");
-            return convertView;
-        }
-        private View getMyMatchView(final int position) {
-            mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View convertView = mInflater.inflate(R.layout.invitiation_row, null);
-            ImageView picture = (ImageView) convertView.findViewById(R.id.imageView1);
-            String imageUrl;
-            TextView textView = (TextView) convertView.findViewById(R.id.textView1);
-            final MatchListElement data = mData.get(position);
-            TurnBasedMatch myTurnMatch = data.getMatch();
-            ImageManager.create(context).loadImage(picture, myTurnMatch.getParticipant(myTurnMatch.getLastUpdaterId()).getIconImageUri());
-            textView.setText(myTurnMatch.getParticipant(myTurnMatch.getLastUpdaterId()).getDisplayName() + " took a turn");
+            textView.setText(data.getInvitation().getInviter().getDisplayName() + getString(R.string.match_invitation));
             convertView.findViewById(R.id.match_row_layout).setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    switch (event.getAction()){
+                    switch (event.getAction()) {
                         case MotionEvent.ACTION_MOVE:
                             return false;
                         case MotionEvent.ACTION_UP:
@@ -513,9 +584,62 @@ public class MainActivity extends ActionBarActivity implements
                     }
                 }
             });
+            ImageButton menuButton = (ImageButton)convertView.findViewById(R.id.menu_button);
+            final PopupMenu menu = new PopupMenu(context, menuButton);
+            menu.inflate(R.menu.menu_invitation_item);
+            menu.setOnMenuItemClickListener(myTurnItemMenuListener);
+            menuButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    myTurnItemPosition = position;
+                    Log.d(LOG_TAG, "onClick " + String.valueOf(position));
+                    menu.show();
+                }
+            });
             return convertView;
         }
-        private View getTheirMatchView(int position) {
+        private View getMyMatchView(final int position) {
+            mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View convertView = mInflater.inflate(R.layout.invitiation_row, null);
+            ImageView picture = (ImageView) convertView.findViewById(R.id.imageView1);
+            String imageUrl;
+            TextView textView = (TextView) convertView.findViewById(R.id.textView1);
+            final MatchListElement data = mData.get(position);
+            TurnBasedMatch myTurnMatch = data.getMatch();
+            ImageManager.create(context).loadImage(picture, myTurnMatch.getParticipant(myTurnMatch.getLastUpdaterId()).getIconImageUri());
+            textView.setText(myTurnMatch.getParticipant(myTurnMatch.getLastUpdaterId()).getDisplayName() + getString(R.string.my_turn_msg));
+            convertView.findViewById(R.id.match_row_layout).setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_MOVE:
+                            return false;
+                        case MotionEvent.ACTION_UP:
+                            Log.d(LOG_TAG, "Row action up");
+                            TurnBasedMatch match = mData.get(position).getMatch();
+                            mData.remove(position);
+                            notifyDataSetChanged();
+                            StartGuessTurn(match);
+                            return true;
+                        default:
+                            return false;
+                    }
+                }
+            });
+            ImageButton menuButton = (ImageButton)convertView.findViewById(R.id.menu_button);
+            final PopupMenu menu = new PopupMenu(context, menuButton);
+            menu.inflate(R.menu.menu_myturn_item);
+            menu.setOnMenuItemClickListener(myTurnItemMenuListener);
+            menuButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    myTurnItemPosition = position;
+                    menu.show();;
+                }
+            });
+            return convertView;
+        }
+        private View getTheirMatchView(final int position) {
             mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View convertView = mInflater.inflate(R.layout.invitiation_row, null);
             ImageView picture = (ImageView) convertView.findViewById(R.id.imageView1);
@@ -525,15 +649,20 @@ public class MainActivity extends ActionBarActivity implements
             final MatchListElement data = mData.get(position);
             TurnBasedMatch theirTurnMatch = data.getMatch();
             ImageManager.create(context).loadImage(picture, theirTurnMatch.getParticipant(theirTurnMatch.getLastUpdaterId()).getIconImageUri());
-            String msg = "Waiting for " + theirTurnMatch.getParticipant(theirTurnMatch.getPendingParticipantId()).getDisplayName();
+            String msg = getString(R.string.their_turn_msg) + theirTurnMatch.getParticipant(theirTurnMatch.getPendingParticipantId()).getDisplayName();
             textView.setText(msg);
+            ImageButton menuButton = (ImageButton)convertView.findViewById(R.id.menu_button);
+            final PopupMenu menu = new PopupMenu(context, menuButton);
+            menu.inflate(R.menu.menu_their_turn_item);
+            menu.setOnMenuItemClickListener(theirTurnItemMenuListener);
+            menuButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    theirTurnItemPosition = position;
+                    menu.show();
+                }
+            });
             return convertView;
-        }
-        private void CancelMatch(int position){
-            TurnBasedMatch theMatch = mData.get(position).getMatch();
-            mData.remove(position);
-            notifyDataSetChanged();
-            Games.TurnBasedMultiplayer.cancelMatch(mGoogleApiClient, theMatch.getMatchId());
         }
     }
     private class MatchListElement {
