@@ -6,8 +6,6 @@
 
     <item android:id="@+id/action_accept_invitation"
         android:title="@string/accept_invitation"/>
-    <item android:id="@+id/action_dismiss"
-        android:title="@string/dismiss"/>
     <item android:id="@+id/action_decline_invitation"
         android:title="@string/decline_invitation"/>
 

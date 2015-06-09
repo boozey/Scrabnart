@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.nakedape.scrabnart.DrawActivity">
 
-    <item android:id="@+id/action_dismiss"
-        android:title="@string/dismiss"/>
+
     <item android:id="@+id/action_leave_match"
         android:title="@string/leave_match"/>
 

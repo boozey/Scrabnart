@@ -14,8 +14,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -31,7 +29,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.common.images.ImageManager;
-import com.google.android.gms.games.Game;
 import com.google.android.gms.games.Games;
 import com.google.android.gms.games.multiplayer.Invitation;
 import com.google.android.gms.games.multiplayer.Multiplayer;
@@ -65,7 +62,8 @@ public class MainActivity extends ActionBarActivity implements
     private Context context = this;
     private ScrabnartGame scrabnartGame;
     private ArrayList<String> leaveMatchList;
-    private ArrayList<String> declineInvitationList;
+    private ArrayList<String> declineInviteList;
+    private ArrayList<String> acceptInviteList;
 
     // Activity method overrides
     @Override
@@ -91,7 +89,8 @@ public class MainActivity extends ActionBarActivity implements
             }
         });
         leaveMatchList = new ArrayList<>();
-        declineInvitationList = new ArrayList<>();
+        declineInviteList = new ArrayList<>();
+        acceptInviteList = new ArrayList<>();
         // Create the Google Api Client with access to the Play Games services
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -220,19 +219,23 @@ public class MainActivity extends ActionBarActivity implements
             Games.TurnBasedMultiplayer.takeTurn(mGoogleApiClient, scrabnartGame.getMatch_id(), scrabnartGame.getGameData(), scrabnartGame.getNextPlayer());
             scrabnartGame.isSaved = true;
         }
+        for (String s : acceptInviteList){
+            Games.TurnBasedMultiplayer.acceptInvitation(mGoogleApiClient, s);
+        }
+        acceptInviteList.clear();
         for (String s : leaveMatchList){
             Games.TurnBasedMultiplayer.leaveMatch(mGoogleApiClient, s);
         }
         leaveMatchList.clear();
-        for (String s : declineInvitationList){
+        for (String s : declineInviteList){
             Games.TurnBasedMultiplayer.declineInvitation(mGoogleApiClient, s);
         }
-        declineInvitationList.clear();
+        declineInviteList.clear();
         Games.TurnBasedMultiplayer
                 .loadMatchesByStatus(mGoogleApiClient, new int[]{TurnBasedMatch.MATCH_TURN_STATUS_INVITED, TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN})
                 .setResultCallback(myTurnMatchesResultCallback);
         Games.TurnBasedMultiplayer
-                .loadMatchesByStatus(mGoogleApiClient, new int[] {TurnBasedMatch.MATCH_TURN_STATUS_THEIR_TURN})
+                .loadMatchesByStatus(mGoogleApiClient, new int[]{TurnBasedMatch.MATCH_TURN_STATUS_THEIR_TURN})
                 .setResultCallback(theirTurnMatchesResultCallback);
     }
     @Override
@@ -425,15 +428,22 @@ public class MainActivity extends ActionBarActivity implements
             leaveMatchList.add(match_id);
         }
     }
+    private void AcceptInvitation(String match_id){
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()){
+            Games.TurnBasedMultiplayer.acceptInvitation(mGoogleApiClient, match_id).setResultCallback(new MatchInitiatedCallback());
+        }
+        else {
+            acceptInviteList.add(match_id);
+        }
+    }
     private void DeclineInvitation(String match_id){
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()){
             Games.TurnBasedMultiplayer.declineInvitation(mGoogleApiClient, match_id);
         }
         else {
-            declineInvitationList.add(match_id);
+            declineInviteList.add(match_id);
         }
     }
-
 
     private int myTurnItemPosition = 0;
     private PopupMenu.OnMenuItemClickListener myTurnItemMenuListener = new PopupMenu.OnMenuItemClickListener() {
@@ -450,6 +460,7 @@ public class MainActivity extends ActionBarActivity implements
             }
             switch (item.getItemId()){
                 case R.id.action_accept_invitation:
+                    AcceptInvitation(invitation.getInvitationId());
                     return true;
                 case R.id.action_decline_invitation:
                     myTurnItemAdapter.removeItem(myTurnItemPosition);
@@ -559,13 +570,11 @@ public class MainActivity extends ActionBarActivity implements
             mInflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View convertView = mInflater.inflate(R.layout.invitiation_row, null);
             ImageView picture = (ImageView)convertView.findViewById(R.id.imageView1);
-            String imageUrl;
             TextView textView = (TextView) convertView.findViewById(R.id.textView1);
-            Button button;
             final MatchListElement data = mData.get(position);
-            Invitation invitation = data.getInvitation();
+            final Invitation invitation = data.getInvitation();
             ImageManager.create(context).loadImage(picture, invitation.getInviter().getIconImageUri());
-            textView.setText(data.getInvitation().getInviter().getDisplayName() + getString(R.string.match_invitation));
+            textView.setText(data.getInvitation().getInviter().getDisplayName() + " " + getString(R.string.match_invitation));
             convertView.findViewById(R.id.match_row_layout).setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
@@ -574,10 +583,9 @@ public class MainActivity extends ActionBarActivity implements
                             return false;
                         case MotionEvent.ACTION_UP:
                             Log.d(LOG_TAG, "Row action up");
-                            TurnBasedMatch match = mData.get(position).getMatch();
                             mData.remove(position);
                             notifyDataSetChanged();
-                            StartGuessTurn(match);
+                            AcceptInvitation(invitation.getInvitationId());
                             return true;
                         default:
                             return false;
@@ -607,7 +615,7 @@ public class MainActivity extends ActionBarActivity implements
             final MatchListElement data = mData.get(position);
             TurnBasedMatch myTurnMatch = data.getMatch();
             ImageManager.create(context).loadImage(picture, myTurnMatch.getParticipant(myTurnMatch.getLastUpdaterId()).getIconImageUri());
-            textView.setText(myTurnMatch.getParticipant(myTurnMatch.getLastUpdaterId()).getDisplayName() + getString(R.string.my_turn_msg));
+            textView.setText(myTurnMatch.getParticipant(myTurnMatch.getLastUpdaterId()).getDisplayName() + " " + getString(R.string.my_turn_msg));
             convertView.findViewById(R.id.match_row_layout).setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
@@ -649,7 +657,7 @@ public class MainActivity extends ActionBarActivity implements
             final MatchListElement data = mData.get(position);
             TurnBasedMatch theirTurnMatch = data.getMatch();
             ImageManager.create(context).loadImage(picture, theirTurnMatch.getParticipant(theirTurnMatch.getLastUpdaterId()).getIconImageUri());
-            String msg = getString(R.string.their_turn_msg) + theirTurnMatch.getParticipant(theirTurnMatch.getPendingParticipantId()).getDisplayName();
+            String msg = getString(R.string.their_turn_msg) + " " + theirTurnMatch.getParticipant(theirTurnMatch.getPendingParticipantId()).getDisplayName();
             textView.setText(msg);
             ImageButton menuButton = (ImageButton)convertView.findViewById(R.id.menu_button);
             final PopupMenu menu = new PopupMenu(context, menuButton);

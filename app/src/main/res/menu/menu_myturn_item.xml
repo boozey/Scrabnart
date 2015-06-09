@@ -6,8 +6,6 @@
 
     <item android:id="@+id/action_take_my_turn"
         android:title="@string/take_my_turn"/>
-    <item android:id="@+id/action_dismiss"
-        android:title="@string/dismiss"/>
     <item android:id="@+id/action_leave_match"
         android:title="@string/leave_match"/>
 
